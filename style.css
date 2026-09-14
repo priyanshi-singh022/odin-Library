@@ -7,10 +7,18 @@
 
 body {
   font-family: system-ui, sans-serif;
-  background: rgb(2, 97, 60);  
+  min-height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    #344B78 0%,
+    #2D8290 35%,
+    #16C8B8 65%,
+    #009BEE 100%
+  );
   color: #333;
   line-height: 1.4;
   padding: 2rem;
+  
 }
 
 /* Header */
