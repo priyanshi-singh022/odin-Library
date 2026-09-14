@@ -12,27 +12,44 @@ class Book {
   }
 }
 
-const Library = [];
+const STORAGE_KEY = "libraryBooks";
 
-class addBookToLibrary {
-  constructor(title, author, pages, read) {
-    const newBook = new Book(title, author, pages, read);
-    Library.push(newBook);
-    renderLibrary();
+function loadLibrary() {
+  const savedBooks = localStorage.getItem(STORAGE_KEY);
+  if (!savedBooks) return [];
+
+  try {
+    return JSON.parse(savedBooks).map((book) =>
+      Object.assign(new Book(book.title, book.author, book.pages, book.read), book),
+    );
+  } catch {
+    return [];
   }
 }
 
-class renderLibrary {
-  constructor() {
-    const container = document.getElementById("library-container");
-    container.innerHTML = "";
+function saveLibrary() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(Library));
+}
 
-    Library.forEach((book) => {
-      const card = document.createElement("div");
-      card.classList.add("book-card");
-      card.dataset.id = book.id;
+const Library = loadLibrary();
 
-      card.innerHTML = `
+function addBookToLibrary(title, author, pages, read) {
+  const newBook = new Book(title, author, pages, read);
+  Library.push(newBook);
+  saveLibrary();
+  renderLibrary();
+}
+
+function renderLibrary() {
+  const container = document.getElementById("library-container");
+  container.innerHTML = "";
+
+  Library.forEach((book) => {
+    const card = document.createElement("div");
+    card.classList.add("book-card");
+    card.dataset.id = book.id;
+
+    card.innerHTML = `
       <h2>${book.title}</h2>
       <p><strong>Author:</strong> ${book.author}</p>
       <p><strong>Pages:</strong> ${book.pages}</p>
@@ -41,9 +58,8 @@ class renderLibrary {
       <button class="remove-book">Remove</button>
     `;
 
-      container.appendChild(card);
-    });
-  }
+    container.appendChild(card);
+  });
 }
 
 const dialog = document.getElementById("book-dialog");
@@ -86,17 +102,23 @@ document
 
     if (e.target.classList.contains("toggle-read")) {
       book.toggleRead();
+      saveLibrary();
       renderLibrary();   // to redraws the whole UI so the card now shows the updated status.
     }
 
     if (e.target.classList.contains("remove-book")) {
       const index = Library.findIndex((b) => b.id === bookId);
       Library.splice(index, 1);
+      saveLibrary();
       renderLibrary();
     }
   });
 
 
 // Sample books to start with
-addBookToLibrary("The Hobbit", "J.R.R. Tolkien", 295, true);
-addBookToLibrary("Harry Potter", "J.K. Rowling", 500, false);
+if (Library.length === 0) {
+  addBookToLibrary("The Hobbit", "J.R.R. Tolkien", 295, true);
+  addBookToLibrary("Harry Potter", "J.K. Rowling", 500, false);
+} else {
+  renderLibrary();
+}
